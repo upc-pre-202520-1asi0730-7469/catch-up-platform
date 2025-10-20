@@ -26,7 +26,6 @@
     <ItemGroup>
       <Folder Include="News\" />
       <Folder Include="Shared\Domain\Model\" />
-      <Folder Include="Shared\Domain\Repositories\" />
       <Folder Include="Shared\Interfaces\" />
     </ItemGroup>
 
