@@ -49,4 +49,39 @@ public class FavoriteSourcesController(
         var favoriteSourceResource = FavoriteSourceResourceFromEntityAssembler.ToResourceFromEntity(result);
         return Ok(favoriteSourceResource);
     }
+
+    private async Task<IActionResult> GetAllFavoriteSourcesByNewsApiKey(string newsApiKey)
+    {
+        var getAllFavoriteSourcesByNewsApiKeyQuery = new GetAllFavoriteSourcesByNewsApiKeyQuery(newsApiKey);
+        var result = await favoriteSourceQueryService.Handle(getAllFavoriteSourcesByNewsApiKeyQuery);
+        var resources = result.Select(FavoriteSourceResourceFromEntityAssembler.ToResourceFromEntity);
+        return Ok(resources);
+    }
+
+    private async Task<IActionResult> GetFavoriteSourceByNewsApiKeyAndSourceId(string newsApiKey, string sourceId)
+    {
+        var getFavoriteSourceByNewsApiKeyAndSourceIdQuery =
+            new GetFavoriteSourceByNewsApiKeyAndSourceIdQuery(newsApiKey, sourceId);
+        var result = await favoriteSourceQueryService
+            .Handle(getFavoriteSourceByNewsApiKeyAndSourceIdQuery);
+        if (result is null) return NotFound();
+        var resource = FavoriteSourceResourceFromEntityAssembler.ToResourceFromEntity(result);
+        return Ok(resource);
+    }
+
+    [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get favorite sources",
+        Description = "Retrieves favorite sources based on the provided query parameters.",
+        OperationId = "GetFavoriteSourcesFromQuery")]
+    [SwaggerResponse(200, "Favorite sources retrieved successfully", typeof(FavoriteSourceResource))]
+    public async Task<IActionResult> GetFavoriteSourcesFromQuery(
+        [FromQuery] string newsApiKey,
+        [FromQuery] string sourceId = "")
+    {
+        return string.IsNullOrEmpty(sourceId)
+            ? await GetAllFavoriteSourcesByNewsApiKey(newsApiKey)
+            : await GetFavoriteSourceByNewsApiKeyAndSourceId(newsApiKey, sourceId);
+    }
+
 }
